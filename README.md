@@ -32,7 +32,7 @@ source .venv/bin/activate
 
 |1|2|3|4|5|6|
 |:-:|:-:|:-:|:-:|:-:|:-:|
-|||||||
+|<img width="48" height="48" alt="195332" src="https://github.com/user-attachments/assets/30c9d97b-5fbf-4099-b313-2adaece4819b" />|<img width="48" height="48" alt="195273" src="https://github.com/user-attachments/assets/4709836a-ebc9-493d-8e09-51f0055d0cbe" />|<img width="48" height="48" alt="195238" src="https://github.com/user-attachments/assets/75d42c24-2692-4c3d-9682-3974243815e8" />|<img width="48" height="48" alt="wearing_hat_101005" src="https://github.com/user-attachments/assets/094ae745-fc9b-403c-b674-62a99ae768f0" />|<img width="48" height="48" alt="wearing_hat_100098" src="https://github.com/user-attachments/assets/07bf4469-11bf-48b6-b75e-3f22cfb46138" />|<img width="48" height="48" alt="wearing_hat_100017" src="https://github.com/user-attachments/assets/72fc26f3-a2ca-4233-9709-bbab25c1aad7" />|
 
 ## Demo
 
