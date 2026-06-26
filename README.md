@@ -73,7 +73,7 @@ python demo_hhc.py --model yolomit_t_wholebody28_1x3x480x640.onnx --hhc_model hh
 ## Train
 
 ```bash
-SIZE=32x32
+SIZE=48x48
 VAR=p
 uv run python -m hhc train \
 --data_root data/dataset.parquet \
@@ -91,7 +91,7 @@ uv run python -m hhc train \
 --use_amp
 ```
 ```bash
-SIZE=32x32
+SIZE=48x48
 VAR=n
 uv run python -m hhc train \
 --data_root data/dataset.parquet \
@@ -109,7 +109,7 @@ uv run python -m hhc train \
 --use_amp
 ```
 ```bash
-SIZE=32x32
+SIZE=48x48
 VAR=t
 uv run python -m hhc train \
 --data_root data/dataset.parquet \
@@ -127,7 +127,7 @@ uv run python -m hhc train \
 --use_amp
 ```
 ```bash
-SIZE=32x32
+SIZE=48x48
 VAR=s
 uv run python -m hhc train \
 --data_root data/dataset.parquet \
@@ -145,7 +145,7 @@ uv run python -m hhc train \
 --use_amp
 ```
 ```bash
-SIZE=32x32
+SIZE=48x48
 VAR=l
 uv run python -m hhc train \
 --data_root data/dataset.parquet \
