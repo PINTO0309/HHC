@@ -1,4 +1,5 @@
 # HHC
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20931298.svg)](https://doi.org/10.5281/zenodo.20931298) ![GitHub License](https://img.shields.io/github/license/pinto0309/HHC) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/PINTO0309/hhc)
 
 Head Hat Classification. HHC is a binary classifier for cropped head images. 48x48.
 
@@ -213,3 +214,20 @@ interact with smartphones](https://github.com/PINTO0309/PUC) - MIT License
 8. [UHD: Ultra-lightweight human detection](https://github.com/PINTO0309/UHD) - MIT License
 9. [MWC: Mask wearing classifier.](https://github.com/PINTO0309/MWC) - MIT License
 10. [SGC: Classification of wearing vs. not wearing sunglasses. 48x48.](https://github.com/PINTO0309/SGC) - MIT License
+
+## Citation
+
+If you find this project useful, please consider citing:
+
+```bibtex
+@software{hyodo2026hhc,
+  author    = {Katsuya Hyodo},
+  title     = {PINTO0309/HHC},
+  month     = {06},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.20931298},
+  url       = {https://github.com/PINTO0309/hhc},
+  abstract  = {Head Hat Classification. HHC is a binary classifier for cropped head images. 48x48.},
+}
+```
