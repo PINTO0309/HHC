@@ -182,3 +182,21 @@ uv run python -m hhc train \
 --device auto \
 --use_amp
 ```
+
+## Export ONNX
+
+Training exports the best checkpoint to ONNX automatically.
+To export a checkpoint manually, run:
+
+```bash
+uv run python -m hhc exportonnx \
+--checkpoint runs/hhc_is_l_48x48/hhc_best_epoch0067_f1_0.9430.pt \
+--output hhc_is_l_48x48.onnx \
+--opset 17 \
+--device cpu
+```
+
+Use the `hhc_best_*.pt` checkpoint from the target run directory.
+
+## Arch
+<img width="300" alt="hhc_is_p_48x48" src="https://github.com/user-attachments/assets/7c6b271d-725d-4a0c-97f7-e47ba1580ac5" />
