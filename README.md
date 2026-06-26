@@ -26,7 +26,7 @@ uv sync --all-extras
 source .venv/bin/activate
 ```
 
-<img width="600" alt="dataset_class_ratio" src="https://github.com/user-attachments/assets/07cdb9a9-d6c3-43bd-b06c-931c3a942149" />
+<img width="600" alt="dataset_class_ratio" src="https://github.com/user-attachments/assets/4e2ea89a-9d1a-43a2-b6f4-ba58d63cb31c" />
 
 ## Data sample
 
