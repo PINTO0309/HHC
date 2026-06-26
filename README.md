@@ -9,66 +9,84 @@ Head Hat Classification. HHC is a binary classifier for cropped head images.
 | 0 | `no_wearing_hat` |
 | 1 | `wearing_hat` |
 
-Default input size is `32x32`.
+Default input size is `48x48`.
 
-## Dataset
+|Variant|Size|F1|CPU<br>inference<br>latency|ONNX|
+|:-:|:-:|:-:|:-:|:-:|
+|P|115 KB||0.23 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_p_48x48.onnx)|
+|N|176 KB||0.41 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_n_48x48.onnx)|
+|T|280 KB||0.52 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_t_48x48.onnx)|
+|S|495 KB||0.64 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_s_48x48.onnx)|
+|L|6.4 MB||1.03 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_l_48x48.onnx)|
 
-Expected image layout:
-
-```text
-data/
-  train/
-    no_wearing_hat/<source_id>/*.png
-    wearing_hat/<source_id>/*.png
-  val/
-    no_wearing_hat/<source_id>/*.png
-    wearing_hat/<source_id>/*.png
-```
-
-Current dataset counts:
-
-| split | no_wearing_hat | wearing_hat |
-| --- | ---: | ---: |
-| train | 8,383 | 8,383 |
-| val | 932 | 932 |
-
-## Commands
-
-Build the parquet dataset:
+## Install
 
 ```bash
-python 01_build_hat_parquet.py --root data --output data/dataset.parquet
+uv sync --all-extras
+source .venv/bin/activate
 ```
 
-Plot the class ratio:
+<img width="600" alt="dataset_class_ratio" src="https://github.com/user-attachments/assets/07cdb9a9-d6c3-43bd-b06c-931c3a942149" />
+
+## Data sample
+
+|1|2|3|4|5|6|
+|:-:|:-:|:-:|:-:|:-:|:-:|
+|||||||
+
+## Demo
+
+The demo script needs a YOLO whole-body detector ONNX/TFLite model and an HHC sunglasses classifier ONNX model.
+Place the detector model in the repository root, or pass its path with `--model`.
+Use the ONNX file exported by training for `--hhc_model`.
 
 ```bash
-python 02_plot_dataset_pie.py --input data/dataset.parquet
+uv run python demo_hhc.py \
+--model yolomit_t_wholebody28_1x3x480x640.onnx \
+--hhc_model hhc_is_l_48x48.onnx \
+--images_dir path/to/images \
+--execution_provider cpu \
+--disable_waitKey
 ```
 
-Train:
+For a video file:
 
 ```bash
-hhc train --data_root data --output_dir runs/hhc_32x32 --image_size 32
+uv run python demo_hhc.py \
+--model yolomit_t_wholebody28_1x3x480x640.onnx \
+--hhc_model hhc_is_l_48x48.onnx \
+--video path/to/video.mp4 \
+--execution_provider cpu
 ```
 
-Predict with a checkpoint:
+For a camera:
 
 ```bash
-hhc predict --checkpoint runs/hhc_32x32/hhc_best_epoch0001_f1_0.9000.pt --inputs path/to/images
+uv run python demo_hhc.py \
+--model yolomit_t_wholebody28_1x3x480x640.onnx \
+--hhc_model hhc_is_l_48x48.onnx \
+--video 0 \
+--execution_provider cpu \
+--disable_generation_identification_mode \
+--disable_gender_identification_mode \
+--disable_left_and_right_hand_identification_mode \
+--disable_headpose_identification_mode
 ```
-
-Export ONNX:
-
 ```bash
-hhc exportonnx --checkpoint runs/hhc_32x32/hhc_best_epoch0001_f1_0.9000.pt --output hhc_32x32.onnx
+uv run python demo_hhc.py \
+--model yolomit_t_wholebody28_1x3x480x640.onnx \
+--hhc_model hhc_is_l_48x48.onnx \
+--video 0 \
+--execution_provider cuda \
+--disable_generation_identification_mode \
+--disable_gender_identification_mode \
+--disable_left_and_right_hand_identification_mode \
+--disable_headpose_identification_mode
 ```
 
-Run the whole-body demo with the HHC ONNX classifier:
-
-```bash
-python demo_hhc.py --model yolomit_t_wholebody28_1x3x480x640.onnx --hhc_model hhc_32x32.onnx --images_dir path/to/images
-```
+Processed still images are saved under `output/`.
+Video input is also recorded to `output.mp4` by default; add `--disable_video_writer` to skip recording.
+Use `--execution_provider cuda` or `--execution_provider tensorrt` when the required ONNXRuntime GPU/TensorRT environment is available.
 
 ## Train
 
