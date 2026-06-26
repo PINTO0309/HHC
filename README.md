@@ -39,7 +39,7 @@ source .venv/bin/activate
 
 ## Demo
 
-The demo script needs a YOLO whole-body detector ONNX/TFLite model and an HHC sunglasses classifier ONNX model.
+The demo script needs a YOLO whole-body detector ONNX/TFLite model and an HHC hat classifier ONNX model.
 Place the detector model in the repository root, or pass its path with `--model`.
 Use the ONNX file exported by training for `--hhc_model`.
 
