@@ -76,7 +76,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--image-size",
         type=parse_image_size,
-        default=parse_image_size("32x32"),
+        default=parse_image_size("48x48"),
         metavar="HEIGHTxWIDTH",
         help="Resize images before embedding into parquet using HEIGHTxWIDTH format (default: 32x32).",
     )
