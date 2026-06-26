@@ -1,0 +1,208 @@
+#!/usr/bin/env python
+
+from __future__ import annotations
+
+import argparse
+import io
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable, List, Optional
+
+import pandas as pd
+from PIL import Image
+from tqdm.auto import tqdm
+
+
+# Classes are fixed: 0 = no_wearing_hat, 1 = wearing_hat.
+CLASS_MAP = {
+    "no_wearing_hat": 0,
+    "wearing_hat": 1,
+}
+
+SPLIT_MAP = {
+    "train": "train",
+    "training": "train",
+    "val": "val",
+    "valid": "val",
+    "validation": "val",
+    "dev": "val",
+    "test": "test",
+    "testing": "test",
+}
+
+RESAMPLING = getattr(Image, "Resampling", Image)
+
+
+@dataclass(frozen=True)
+class SampleRow:
+    split: str
+    image_path: str
+    image_bytes: bytes
+    class_id: int
+    label: str
+    source: str
+    filename: str
+    video_id: str
+    timestamp: int
+    person_id: int
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build dataset.parquet for the HHC hat classifier from image folders under data/, "
+            "embedding resized image bytes and deriving classes from no_wearing_hat/wearing_hat path components."
+        )
+    )
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=Path("data"),
+        help="Root directory containing no_wearing_hat/ and wearing_hat/ image folders.",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("data/dataset.parquet"),
+        help="Destination parquet file path.",
+    )
+    parser.add_argument(
+        "--extensions",
+        nargs="*",
+        default=[".png", ".jpg", ".jpeg"],
+        help="Image file extensions to include (default: .png .jpg .jpeg).",
+    )
+    parser.add_argument(
+        "--image-size",
+        type=parse_image_size,
+        default=parse_image_size("32x32"),
+        metavar="HEIGHTxWIDTH",
+        help="Resize images before embedding into parquet using HEIGHTxWIDTH format (default: 32x32).",
+    )
+    return parser.parse_args()
+
+
+def parse_image_size(value: str) -> tuple[int, int]:
+    normalized = value.strip().lower()
+    parts = normalized.split("x")
+    if len(parts) != 2:
+        raise argparse.ArgumentTypeError(f"Invalid image size {value!r}; expected HEIGHTxWIDTH.")
+    try:
+        height, width = (int(part) for part in parts)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"Invalid image size {value!r}; expected HEIGHTxWIDTH.") from exc
+    if width < 1 or height < 1:
+        raise argparse.ArgumentTypeError(f"Invalid image size {value!r}; dimensions must be positive.")
+    return width, height
+
+
+def iter_images(base: Path, extensions: Iterable[str]) -> Iterable[tuple[Path, str]]:
+    allowed = {ext.lower() for ext in extensions}
+    for path in sorted(base.rglob("*")):
+        if path.is_file() and path.suffix.lower() in allowed:
+            rel_path = path.relative_to(base).as_posix()
+            yield path, rel_path
+
+
+def infer_split(rel_path: str) -> str:
+    for part in Path(rel_path).parts:
+        candidate = SPLIT_MAP.get(part.lower())
+        if candidate is not None:
+            return candidate
+    return "train"
+
+
+def infer_label(rel_path: str) -> Optional[tuple[int, str]]:
+    for part in Path(rel_path).parts:
+        label = part.lower()
+        if label in CLASS_MAP:
+            return CLASS_MAP[label], label
+    return None
+
+
+def encode_resized_image(path: Path, image_size: tuple[int, int]) -> bytes:
+    output = io.BytesIO()
+    format_name = "PNG"
+    if path.suffix.lower() in {".jpg", ".jpeg"}:
+        format_name = "JPEG"
+    with Image.open(path) as image:
+        resized = image.convert("RGB").resize(image_size, RESAMPLING.LANCZOS)
+        save_kwargs = {"format": format_name}
+        if format_name == "JPEG":
+            save_kwargs["quality"] = 100
+        resized.save(output, **save_kwargs)
+    return output.getvalue()
+
+
+def build_dataframe(root: Path, extensions: Iterable[str], image_size: tuple[int, int]) -> pd.DataFrame:
+    if not root.exists():
+        raise FileNotFoundError(f"Dataset root not found: {root}")
+
+    image_entries = list(iter_images(root, extensions))
+    if not image_entries:
+        raise RuntimeError(f"No images found under {root}.")
+
+    rows: List[SampleRow] = []
+    person_counter = 1
+    skipped_unlabeled = 0
+
+    for path, rel_path in tqdm(
+        image_entries,
+        desc="Building parquet",
+        unit="img",
+        dynamic_ncols=True,
+    ):
+        split = infer_split(rel_path)
+        label_result = infer_label(rel_path)
+        if label_result is None:
+            skipped_unlabeled += 1
+            continue
+        class_id, label = label_result
+        rel_parent = Path(rel_path).parent
+        parent = rel_parent.as_posix()
+        source = root.name
+        parent_parts = rel_parent.parts
+        if len(parent_parts) >= 2 and parent_parts[0].lower() in CLASS_MAP:
+            source = parent_parts[1]
+        rows.append(
+            SampleRow(
+                split=split,
+                image_path=rel_path,
+                image_bytes=encode_resized_image(path, image_size),
+                class_id=class_id,
+                label=label,
+                source=source,
+                filename=path.name,
+                video_id=root.name if parent == "." else parent,
+                timestamp=0,
+                person_id=person_counter,
+            )
+        )
+        person_counter += 1
+
+    df = pd.DataFrame(rows)
+    if df.empty:
+        raise RuntimeError(
+            f"No labelled images found under {root}; expected images below no_wearing_hat/ or wearing_hat/ directories."
+        )
+    df = df.sort_values(["split", "class_id", "image_path"]).reset_index(drop=True)
+    if skipped_unlabeled:
+        print(f"Skipped {skipped_unlabeled} image(s) without no_wearing_hat/wearing_hat path component.")
+    return df
+
+
+def main() -> None:
+    args = parse_args()
+    df = build_dataframe(args.root, args.extensions, args.image_size)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(args.output, index=False)
+    print(f"Wrote {len(df)} rows to {args.output} with resized image bytes {args.image_size[0]}x{args.image_size[1]}")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
