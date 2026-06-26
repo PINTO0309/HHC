@@ -2,6 +2,8 @@
 
 Head Hat Classification. HHC is a binary classifier for cropped head images. 48x48.
 
+https://github.com/user-attachments/assets/d719d64e-8c5a-454c-9dc8-3c02b776a1a9
+
 ## Classes
 
 | class_id | label |
