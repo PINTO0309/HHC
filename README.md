@@ -17,7 +17,7 @@ Default input size is `48x48`.
 |N|176 KB||0.41 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_n_48x48.onnx)|
 |T|280 KB||0.52 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_t_48x48.onnx)|
 |S|495 KB||0.64 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_s_48x48.onnx)|
-|L|6.4 MB||1.03 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_l_48x48.onnx)|
+|L|6.4 MB|0.9650|1.03 ms|[Download](https://github.com/PINTO0309/HHC/releases/download/onnx/hhc_l_48x48.onnx)|
 
 ## Install
 
