@@ -200,7 +200,7 @@ uv run python -m hhc exportonnx \
 Use the `hhc_best_*.pt` checkpoint from the target run directory.
 
 ## Arch
-<img width="300" alt="hhc_is_p_48x48" src="https://github.com/user-attachments/assets/7c6b271d-725d-4a0c-97f7-e47ba1580ac5" />
+<img width="300" alt="hhc_is_p_48x48" src="https://github.com/user-attachments/assets/dcda6585-71f9-4436-89e9-78807bbc7e67" />
 
 ## Ultra-lightweight classification model series
 1. [VSDLM: Visual-only speech detection driven by lip movements](https://github.com/PINTO0309/VSDLM) - MIT License
